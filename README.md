@@ -2,56 +2,56 @@
 
 ## Project Setup
 
-- [ ] Create the project repository
-- [ ] Define the project directory structure
+- [x] Create the project repository
+- [x] Define the project directory structure
 - [ ] Add a basic README
-- [ ] Add build/run instructions
-- [ ] Decide how Python will invoke the C engine
-- [ ] Decide where temporary and generated files will live
-- [ ] Define basic error/exit codes for the C executable
+- [x] Add build/run instructions
+- [x] Decide how Python will invoke the C engine
+- [x] Decide where temporary and generated files will live
+- [x] Define basic error/exit codes for the C executable
 
 ## Python Application
 
-- [ ] Choose a lightweight UI library
-- [ ] Create the main application window
-- [ ] Implement basic grid rendering
-- [ ] Implement basic user interaction with the grid
-- [ ] Add controls for starting and stopping a simulation
-- [ ] Add generation navigation or playback
-- [ ] Create a Python-side representation of the simulation configuration
-- [ ] Add validation for configuration and input data
+- [x] Choose a lightweight UI library
+- [x] Create the main application window
+- [x] Implement basic grid rendering
+- [x] Implement basic user interaction with the grid
+- [x] Add controls for starting and stopping a simulation
+- [x] Add generation navigation or playback
+- [x] Create a Python-side representation of the simulation configuration
+- [x] Add validation for configuration and input data
 
 ## C Simulation Engine
 
-- [ ] Define the cell representation
-- [ ] Define the grid representation
-- [ ] Implement grid allocation and cleanup
-- [ ] Implement reading the current generation
-- [ ] Implement calculation of the next generation
-- [ ] Keep the current generation immutable during next-generation calculation
-- [ ] Implement `current_grid` / `next_grid` swapping
-- [ ] Implement boundary behavior
-- [ ] Implement standard Conway's Game of Life rules
-- [ ] Add clear exit statuses for failures
-- [ ] Compile the engine as a standalone executable
+- [x] Define the cell representation
+- [x] Define the grid representation
+- [x] Implement grid allocation and cleanup
+- [x] Implement reading the current generation
+- [x] Implement calculation of the next generation
+- [x] Keep the current generation immutable during next-generation calculation
+- [x] Implement `current_grid` / `next_grid` swapping
+- [x] Implement boundary behavior
+- [x] Implement standard Conway's Game of Life rules
+- [x] Add clear exit statuses for failures
+- [x] Compile the engine as a standalone executable
 
 ## Python ↔ C Integration
 
-- [ ] Launch the C executable from Python
-- [ ] Pass input/configuration file paths as command-line arguments
-- [ ] Check the process exit status
-- [ ] Capture useful error output
-- [ ] Read simulation output after successful execution
-- [ ] Handle missing or invalid output files
-- [ ] Keep simulation data separate from process status/error reporting
+- [x] Launch the C executable from Python
+- [x] Pass input/configuration file paths as command-line arguments
+- [x] Check the process exit status
+- [x] Capture useful error output
+- [x] Read simulation output after successful execution
+- [x] Handle missing or invalid output files
+- [x] Keep simulation data separate from process status/error reporting
 
 ## Simulation Data Format
 
-- [ ] Define the initial-state format
-- [ ] Define the simulation configuration format
-- [ ] Define the result format
-- [ ] Decide whether results store full snapshots or diffs
-- [ ] Use full snapshots for the first implementation
+- [x] Define the initial-state format
+- [x] Define the simulation configuration format
+- [x] Define the result format
+- [x] Decide whether results store full snapshots or diffs
+- [x] Use full snapshots for the first implementation
 - [ ] Document coordinate conventions
 - [ ] Document grid dimensions
 - [ ] Document generation numbering

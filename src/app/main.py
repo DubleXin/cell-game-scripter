@@ -62,7 +62,6 @@ def main() -> None:
         ],
     )
 
-    # Temporary initial state until SetupTab is ready.
     set_simulation(
         initial_grid=initial_grid,
         generation_count=25,
