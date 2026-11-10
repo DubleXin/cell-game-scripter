@@ -1,12 +1,12 @@
 import os
 
 
-def write(
+def write_grid(
     data_path: str,
     grid: tuple[int, int],
     max_generations: int,
     initial_state: list[int],
 ) -> None:
     os.makedirs(data_path, exist_ok=True)
-    with open(os.path.join(data_path, ".input"), "w") as f:
+    with open(os.path.join(data_path, ".input_grid"), "w") as f:
         f.write(f"{grid[0]}\n{grid[1]}\n{max_generations}\n{initial_state}")

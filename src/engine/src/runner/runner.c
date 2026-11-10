@@ -10,7 +10,12 @@ int run(cfg_t *cfg)
     if (!cfg || cfg->width == 0 || cfg->height == 0 || cfg->max_sims == 0 || !cfg->initial_grid)
         return 1;
 
-    sim_t *sim = sim_create(cfg->max_sims, cfg->initial_grid);
+    sim_t *sim = sim_create(
+        cfg->max_sims,
+        cfg->initial_grid,
+        cfg->rules,
+        cfg->rule_count,
+        cfg->neighborhood_size);
 
     if (!sim)
         return 1;

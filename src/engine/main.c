@@ -6,7 +6,7 @@
 
 int main()
 {
-    cfg_t *cfg = read_data(NULL);
+    cfg_t *cfg = read_data(NULL, NULL);
     if (!cfg)
         return 1;
 

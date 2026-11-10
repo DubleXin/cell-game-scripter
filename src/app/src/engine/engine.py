@@ -3,9 +3,11 @@ import sys
 from pathlib import Path
 
 from app.src.models.grid import Grid
+from app.src.models.rule import Rule
 from app.src.models.simulation import Simulation
 from app.src.serializer.read_output import read
-from app.src.serializer.write_input import write
+from app.src.serializer.write_input_grid import write_grid
+from app.src.serializer.write_rules import write_rules
 
 
 class EngineError(RuntimeError):
@@ -25,6 +27,8 @@ class Engine:
         self,
         initial_grid: Grid,
         generation_count: int,
+        neighborhood_size: int,
+        rules: list[Rule],
     ) -> Simulation:
         if generation_count <= 0:
             raise ValueError("generation_count must be greater than 0")
@@ -34,12 +38,14 @@ class Engine:
             initial_grid.height,
         )
 
-        write(
+        write_grid(
             str(self.data_path),
             grid_size,
             generation_count,
             initial_grid.cells,
         )
+
+        write_rules(self.data_path, neighborhood_size, rules)
 
         result: subprocess.CompletedProcess[str] = subprocess.run(
             [str(self.executable_path)],

@@ -1,13 +1,12 @@
 #include "cfg.h"
-#include <errno.h>
+
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include "serializer/reader.h"
 
-#include "simulation/cell.h"
-#include "simulation/grid.h"
-
-static int _parse_long_line(const char *line, long *result)
+static int _parse_grid_line(const char *line, long *result)
 {
     if (!line || !result)
         return 1;
@@ -33,147 +32,57 @@ static int _parse_long_line(const char *line, long *result)
     return 0;
 }
 
-int read_grid(cfg_t *cfg, const char *line, int width, int height)
+cfg_t *read_data(const char *init_grid_path, const char *rules_path)
 {
-    if (!cfg || !cfg->initial_grid || !line ||
-        line[0] != '[' || width <= 0 || height <= 0)
+    if (!init_grid_path)
+        init_grid_path = ".data/.input_grid";
+
+    if (!rules_path)
+        rules_path = ".data/.rules";
+
+    FILE *grid_fptr = fopen(init_grid_path, "r");
+
+    if (!grid_fptr)
     {
-        return 1;
-    }
-
-    line++;
-
-    int counter = 0;
-    int x = 0;
-    int y = 0;
-
-    char *end;
-
-    while (*line != ']' && *line != '\0')
-    {
-        if (counter >= width * height)
-        {
-            printf(
-                "Invalid cell count: %d, expected %d\n",
-                counter,
-                width * height);
-
-            return 1;
-        }
-
-        unsigned long value = strtoul(line, &end, 10);
-
-        if (line == end || (value != 0 && value != 1))
-        {
-            printf("Invalid cell value: %lu\n", value);
-            return 1;
-        }
-
-        grid_set_cell(
-            cfg->initial_grid,
-            (cell_state_t)value,
-            x,
-            y);
-
-        counter++;
-
-        x++;
-        if (x == width)
-        {
-            x = 0;
-            y++;
-        }
-
-        line = end;
-
-        if (*line == ']')
-            break;
-
-        if (*line != ',')
-        {
-            printf(
-                "Expected ',' or ']', got '%c'\n",
-                *line);
-
-            return 1;
-        }
-
-        line++;
-
-        if (*line == ']' || *line == '\0')
-        {
-            printf("Expected cell value after ','\n");
-            return 1;
-        }
-    }
-
-    if (*line != ']')
-    {
-        printf("Grid is missing closing ']'\n");
-        return 1;
-    }
-
-    if (counter != width * height)
-    {
-        printf(
-            "Invalid cell count: %d, expected %d\n",
-            counter,
-            width * height);
-
-        return 1;
-    }
-
-    return 0;
-}
-
-cfg_t *read_data(const char *path)
-{
-    if (!path)
-        path = ".data/.input";
-
-    FILE *fptr = fopen(path, "r");
-
-    if (!fptr)
-    {
-        printf("Failed to open file: %s\n", path);
+        printf("Failed to open file: %s\n", init_grid_path);
         return NULL;
     }
 
-    char current_line[1000];
+    char current_line[100];
 
     long width_value;
     long height_value;
     long max_sims;
 
     // Width
-    if (!fgets(current_line, sizeof(current_line), fptr) ||
-        _parse_long_line(current_line, &width_value) != 0 ||
+    if (!fgets(current_line, sizeof(current_line), grid_fptr) ||
+        _parse_grid_line(current_line, &width_value) != 0 ||
         width_value < 3 ||
         width_value > 100)
     {
         printf("Invalid width\n");
-        fclose(fptr);
+        fclose(grid_fptr);
         return NULL;
     }
 
     // Height
-    if (!fgets(current_line, sizeof(current_line), fptr) ||
-        _parse_long_line(current_line, &height_value) != 0 ||
+    if (!fgets(current_line, sizeof(current_line), grid_fptr) ||
+        _parse_grid_line(current_line, &height_value) != 0 ||
         height_value < 3 ||
         height_value > 100)
     {
         printf("Invalid height\n");
-        fclose(fptr);
+        fclose(grid_fptr);
         return NULL;
     }
 
     // Max simulations
-    if (!fgets(current_line, sizeof(current_line), fptr) ||
-        _parse_long_line(current_line, &max_sims) != 0 ||
+    if (!fgets(current_line, sizeof(current_line), grid_fptr) ||
+        _parse_grid_line(current_line, &max_sims) != 0 ||
         max_sims <= 0)
     {
         printf("Invalid max_sims\n");
-        fclose(fptr);
+        fclose(grid_fptr);
         return NULL;
     }
 
@@ -187,7 +96,7 @@ cfg_t *read_data(const char *path)
 
     if (!cfg)
     {
-        fclose(fptr);
+        fclose(grid_fptr);
         return NULL;
     }
 
@@ -204,20 +113,20 @@ cfg_t *read_data(const char *path)
     {
         printf("Failed to allocate grid buffer\n");
         cfg_destroy(cfg);
-        fclose(fptr);
+        fclose(grid_fptr);
         return NULL;
     }
 
     if (!fgets(
             grid_line,
             (int)grid_line_size,
-            fptr))
+            grid_fptr))
     {
         printf("Failed to read grid\n");
 
         free(grid_line);
         cfg_destroy(cfg);
-        fclose(fptr);
+        fclose(grid_fptr);
 
         return NULL;
     }
@@ -230,13 +139,151 @@ cfg_t *read_data(const char *path)
     {
         free(grid_line);
         cfg_destroy(cfg);
-        fclose(fptr);
+        fclose(grid_fptr);
 
         return NULL;
     }
 
     free(grid_line);
-    fclose(fptr);
+    fclose(grid_fptr);
+
+    FILE *rules_fptr = fopen(rules_path, "r");
+
+    if (!rules_fptr)
+    {
+        printf("Failed to open file: %s\n", rules_path);
+        cfg_destroy(cfg);
+        return NULL;
+    }
+
+    long neighborhood_size_value;
+    long rule_count_value;
+
+    /* Neighborhood size */
+    if (!fgets(
+            current_line,
+            sizeof(current_line),
+            rules_fptr) ||
+        _parse_grid_line(
+            current_line,
+            &neighborhood_size_value) != 0 ||
+        neighborhood_size_value < 3 ||
+        neighborhood_size_value > 9 ||
+        neighborhood_size_value % 2 == 0)
+    {
+        printf("Invalid neighborhood size\n");
+
+        fclose(rules_fptr);
+        cfg_destroy(cfg);
+
+        return NULL;
+    }
+
+    /* Rule count */
+    if (!fgets(
+            current_line,
+            sizeof(current_line),
+            rules_fptr) ||
+        _parse_grid_line(
+            current_line,
+            &rule_count_value) != 0 ||
+        rule_count_value < 0 ||
+        rule_count_value > INT_MAX)
+    {
+        printf("Invalid rule count\n");
+
+        fclose(rules_fptr);
+        cfg_destroy(cfg);
+
+        return NULL;
+    }
+
+    cfg->neighborhood_size = (int)neighborhood_size_value;
+    cfg->rule_count = (int)rule_count_value;
+
+    if (cfg->rule_count > 0)
+    {
+        cfg->rules = calloc((size_t)cfg->rule_count, sizeof(rule_t));
+
+        if (!cfg->rules)
+        {
+            printf("Failed to allocate rules\n");
+
+            fclose(rules_fptr);
+            cfg_destroy(cfg);
+
+            return NULL;
+        }
+    }
+
+    int rules_read = 0;
+
+    while (rules_read < cfg->rule_count)
+    {
+        if (!fgets(
+                current_line,
+                sizeof(current_line),
+                rules_fptr))
+        {
+            printf(
+                "Rule count mismatch: "
+                "expected %d, got %d\n",
+                cfg->rule_count,
+                rules_read);
+
+            fclose(rules_fptr);
+            cfg_destroy(cfg);
+
+            return NULL;
+        }
+
+        if (read_rule(
+                &cfg->rules[rules_read],
+                current_line,
+                cfg->neighborhood_size) != 0)
+        {
+            printf("Failed to parse rule %d\n", rules_read);
+
+            fclose(rules_fptr);
+            cfg_destroy(cfg);
+
+            return NULL;
+        }
+
+        rules_read++;
+    }
+
+    if (fgets(
+            current_line,
+            sizeof(current_line),
+            rules_fptr))
+    {
+        printf(
+            "Rule count mismatch: "
+            "expected %d, file contains more rules\n",
+            cfg->rule_count);
+
+        fclose(rules_fptr);
+        cfg_destroy(cfg);
+
+        return NULL;
+    }
+
+    if (rules_read != cfg->rule_count)
+    {
+        printf(
+            "Rule count mismatch: "
+            "expected %d, got %d\n",
+            cfg->rule_count,
+            rules_read);
+
+        fclose(rules_fptr);
+        cfg_destroy(cfg);
+
+        return NULL;
+    }
+
+    fclose(rules_fptr);
 
     return cfg;
 }

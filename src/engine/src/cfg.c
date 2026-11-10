@@ -21,6 +21,10 @@ cfg_t *cfg_create(int width, int height, long max_sims)
     }
     cfg->max_sims = max_sims;
 
+    cfg->neighborhood_size = 0;
+    cfg->rules = NULL;
+    cfg->rule_count = 0;
+
     return cfg;
 }
 
@@ -28,5 +32,7 @@ void cfg_destroy(cfg_t *cfg)
 {
     if (cfg->initial_grid)
         grid_destroy(cfg->initial_grid);
+    if (cfg->rules)
+        free(cfg->rules);
     free(cfg);
 }

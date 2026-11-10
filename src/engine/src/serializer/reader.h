@@ -1,8 +1,9 @@
 #pragma once
 
 #include "cfg.h"
-#include "simulation/grid.h"
 
-cfg_t *read_data(const char *path);
+cfg_t *read_data(const char *init_grid_path, const char *rules_path);
 
-grid_t *read_grid(cfg_t *cfg, const char *line, int width, int height);
+int read_grid(cfg_t *cfg, const char *line, int width, int height);
+
+int read_rule(rule_t *rule, const char *line, int neighborhood_size);

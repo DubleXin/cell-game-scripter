@@ -2,8 +2,10 @@ from collections.abc import Callable
 from tkinter import Tk
 
 from app.src.models.grid import Grid
+from app.src.models.rule import Rule
 from app.src.models.simulation import Simulation
 from app.src.ui.app_ui import AppUI
+from app.src.ui.controllers.rules_controller import RulesController
 from app.src.ui.controllers.setup_controller import SetupController
 from app.src.ui.controllers.simulation_controller import SimulationController
 
@@ -19,15 +21,22 @@ class App:
             [Grid, int],
             bool,
         ],
+        get_rules: Callable[[], list[Rule]],
+        get_neighborhood_size: Callable[[], int],
+        set_rules: Callable[[list[Rule], int], None],
     ) -> None:
         self.get_simulation = get_simulation
         self.set_simulation = set_simulation
+        self.get_rules = get_rules
+        self.get_neighborhood_size = get_neighborhood_size
+        self.set_rules = set_rules
 
         self.root: Tk | None = None
         self.appui: AppUI | None = None
 
         self.setup_controller: SetupController | None = None
         self.simulation_controller: SimulationController | None = None
+        self.rules_controller: RulesController | None = None
 
     def run(self) -> None:
         self.root = Tk()
@@ -48,6 +57,16 @@ class App:
             set_simulation=self.set_simulation,
             on_simulation_ready=(self.simulation_controller.reset),
         )
+
+        self.rules_controller = RulesController(
+            tab=self.appui.rules_tab,
+            get_rules=self.get_rules,
+            get_neighborhood_size=self.get_neighborhood_size,
+            set_rules=self.set_rules,
+        )
+
+        self.rules_controller.bind()
+        self.rules_controller.load()
 
         self.simulation_controller.bind()
         self.setup_controller.bind()
