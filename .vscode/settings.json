@@ -1,0 +1,28 @@
+{
+  "files.associations": {
+    "*.h": "c"
+  },
+  "material-icon-theme.folders.customClones": [
+    {
+      "name": "serializer",
+      "base": "database",
+      "color": "blue-400",
+      "folderNames": ["serializer"],
+      "rootFolderNames": ["serializer"]
+    },
+    {
+      "name": "runner",
+      "base": "scripts",
+      "color": "orange-400",
+      "folderNames": ["runner"],
+      "rootFolderNames": ["runner"]
+    },
+    {
+      "name": "engine",
+      "base": "tools",
+      "color": "amber-500",
+      "folderNames": ["engine"],
+      "rootFolderNames": ["engine"]
+    }
+  ]
+}
